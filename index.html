@@ -1,252 +1,108 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ghost Journal V4</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root {
-            --bg: #0b0e11;
-            --card: #151924;
-            --text: #eaecef;
-            --muted: #848e9c;
-            --green: #0ecb81;
-            --red: #f6465d;
-            --orange: #f0b90b;
-            --border: #2b3139;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        body { background-color: var(--bg); color: var(--text); padding: 20px; padding-bottom: 80px; }
-        .container { max-width: 800px; margin: 0 auto; }
-        
-        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
-        h1 { font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
-        .badge { background: var(--card); padding: 5px 10px; border-radius: 4px; font-size: 0.9rem; color: var(--muted); border: 1px solid var(--border); }
-        
-        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border); }
-        .stat-item { display: flex; flex-direction: column; gap: 5px; }
-        .stat-label { color: var(--muted); font-size: 0.85rem; }
-        .stat-value { font-size: 1.4rem; font-weight: bold; }
-        .val-green { color: var(--green); }
-        .val-red { color: var(--red); }
-        .val-orange { color: var(--orange); }
-        
-        .chart-container { background: var(--card); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border); height: 250px; position: relative; }
-        
-        .section-title { color: var(--orange); font-size: 1.1rem; margin-bottom: 10px; font-weight: bold; }
-        .table-card { background: var(--card); padding: 15px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 400px; }
-        th { text-align: left; color: var(--muted); font-size: 0.8rem; padding: 10px 5px; border-bottom: 1px solid var(--border); text-transform: uppercase; }
-        td { padding: 12px 5px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
-        tr:last-child td { border-bottom: none; }
-        .text-right { text-align: right; }
-        .text-center { text-align: center; }
-        
-        .trade-list { display: flex; flex-direction: column; gap: 10px; }
-        .trade-item { background: var(--card); padding: 15px; border-radius: 8px; border: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .trade-info { display: flex; flex-direction: column; gap: 4px; }
-        .trade-pair { font-weight: bold; font-size: 1rem; }
-        .trade-meta { color: var(--muted); font-size: 0.8rem; display: flex; gap: 8px; }
-        .trade-result { font-weight: bold; font-size: 1.1rem; }
-        
-        .fab-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 100; }
-        .fab { width: 56px; height: 56px; border-radius: 50%; border: none; display: flex; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.5); transition: transform 0.2s; }
-        .fab:active { transform: scale(0.95); }
-        .fab-add { background: var(--green); color: #000; }
-        .fab-export { background: var(--orange); color: #000; font-size: 14px; font-weight: bold; width: auto; padding: 0 15px; border-radius: 28px; }
-        
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 200; padding: 20px; }
-        .modal { background: var(--card); padding: 20px; border-radius: 12px; width: 100%; max-width: 500px; border: 1px solid var(--border); max-height: 90vh; overflow-y: auto; }
-        .modal h2 { margin-bottom: 15px; font-size: 1.2rem; }
-        .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; color: var(--muted); font-size: 0.8rem; margin-bottom: 5px; }
-        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--border); color: var(--text); border-radius: 6px; font-size: 0.9rem; }
-        .form-row { display: flex; gap: 10px; }
-        .form-row .form-group { flex: 1; }
-        .btn-save { width: 100%; padding: 12px; background: var(--green); color: #000; border: none; border-radius: 6px; font-weight: bold; font-size: 1rem; cursor: pointer; margin-top: 10px; }
-        .btn-cancel { width: 100%; padding: 12px; background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; cursor: pointer; margin-top: 10px; }
-        
-        .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: var(--green); color: #000; padding: 10px 20px; border-radius: 20px; font-weight: bold; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 300; }
-        .toast.show { opacity: 1; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ghost Journal V4</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+:root{--bg:#0b0e11;--card:#151924;--text:#eaecef;--muted:#848e9c;--green:#0ecb81;--red:#f6465d;--orange:#f0b90b;--border:#2b3139}
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+body{background:var(--bg);color:var(--text);padding:20px;padding-bottom:80px}
+.container{max-width:800px;margin:0 auto}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:15px;border-bottom:1px solid var(--border)}
+h1{font-size:1.4rem;display:flex;align-items:center;gap:10px}
+.badge{background:var(--card);padding:5px 10px;border-radius:4px;font-size:.85rem;color:var(--muted);border:1px solid var(--border)}
+.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;background:var(--card);padding:20px;border-radius:12px;margin-bottom:20px;border:1px solid var(--border)}
+.stat-item{display:flex;flex-direction:column;gap:5px}
+.stat-label{color:var(--muted);font-size:.82rem}
+.stat-value{font-size:1.35rem;font-weight:bold}
+.val-green{color:var(--green)}.val-red{color:var(--red)}.val-orange{color:var(--orange)}
+.chart-container{background:var(--card);padding:20px;border-radius:12px;margin-bottom:20px;border:1px solid var(--border);height:240px;position:relative}
+.section-title{color:var(--orange);font-size:1.05rem;margin-bottom:10px;font-weight:bold}
+.table-card{background:var(--card);padding:15px;border-radius:12px;margin-bottom:20px;border:1px solid var(--border);overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:380px}
+th{text-align:left;color:var(--muted);font-size:.78rem;padding:10px 5px;border-bottom:1px solid var(--border);text-transform:uppercase}
+td{padding:12px 5px;border-bottom:1px solid var(--border);font-size:.88rem}
+tr:last-child td{border-bottom:none}
+.text-right{text-align:right}.text-center{text-align:center}
+.trade-list{display:flex;flex-direction:column;gap:10px}
+.trade-item{background:var(--card);padding:15px;border-radius:8px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.trade-info{display:flex;flex-direction:column;gap:4px}
+.trade-pair{font-weight:bold;font-size:.98rem}
+.trade-meta{color:var(--muted);font-size:.78rem}
+.trade-result{font-weight:bold;font-size:1.05rem}
+.fab-container{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:10px;z-index:100}
+.fab{height:56px;border-radius:28px;border:none;display:flex;justify-content:center;align-items:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.5);font-weight:bold}
+.fab:active{transform:scale(.95)}
+.fab-add{width:56px;background:var(--green);color:#000;font-size:26px}
+.fab-export{padding:0 18px;background:var(--orange);color:#000;font-size:14px}
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;z-index:200;padding:20px}
+.modal{background:var(--card);padding:20px;border-radius:12px;width:100%;max-width:500px;border:1px solid var(--border);max-height:90vh;overflow-y:auto}
+.modal h2{margin-bottom:15px;font-size:1.15rem}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;color:var(--muted);font-size:.78rem;margin-bottom:5px}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:.88rem}
+.form-row{display:flex;gap:10px}.form-row .form-group{flex:1}
+.btn-save{width:100%;padding:12px;background:var(--green);color:#000;border:none;border-radius:6px;font-weight:bold;font-size:1rem;cursor:pointer;margin-top:10px}
+.btn-cancel{width:100%;padding:12px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:6px;font-size:1rem;cursor:pointer;margin-top:10px}
+.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;padding:10px 20px;border-radius:20px;font-weight:bold;opacity:0;transition:opacity .3s;pointer-events:none;z-index:300}
+.toast.show{opacity:1}
+</style>
 </head>
 <body>
-
 <div class="container">
-    <header>
-        <h1>🖤 GHOST JOURNAL V4</h1>
-        <div class="badge" id="total-trades-badge">0 trades</div>
-    </header>
-
-    <div class="stats-grid">
-        <div class="stat-item"><span class="stat-label">Trades fermés</span><span class="stat-value" id="stat-closed">0</span></div>
-        <div class="stat-item"><span class="stat-label">Winrate</span><span class="stat-value val-green" id="stat-winrate">0%</span></div>
-        <div class="stat-item"><span class="stat-label">Net R</span><span class="stat-value val-green" id="stat-netr">+0.0</span></div>
-        <div class="stat-item"><span class="stat-label">Net %</span><span class="stat-value val-green" id="stat-netpct">+0.00</span></div>
-        <div class="stat-item"><span class="stat-label">Plan OK</span><span class="stat-value val-orange" id="stat-plan">0%</span></div>
-        <div class="stat-item"><span class="stat-label">Discipline</span><span class="stat-value val-green">1</span></div>
-    </div>
-
-    <div class="chart-container"><canvas id="equityChart"></canvas></div>
-
-    <div class="section-title">Par signal</div>
-    <div class="table-card">
-        <table>
-            <thead><tr><th></th><th class="text-center">N</th><th class="text-center">W</th><th class="text-right">NET R</th></tr></thead>
-            <tbody id="tbody-signal"></tbody>
-        </table>
-    </div>
-
-    <div class="section-title">Par session</div>
-    <div class="table-card">
-        <table>
-            <thead><tr><th></th><th class="text-center">N</th><th class="text-center">W</th><th class="text-right">NET R</th></tr></thead>
-            <tbody id="tbody-session"></tbody>
-        </table>
-    </div>
-
-    <div class="section-title">Historique récent</div>
-    <div class="trade-list" id="trade-list"></div>
+<header><h1>🖤 GHOST JOURNAL V4</h1><div class="badge" id="total-trades-badge">0 trades</div></header>
+<div class="stats-grid">
+<div class="stat-item"><span class="stat-label">Trades fermés</span><span class="stat-value" id="stat-closed">0</span></div>
+<div class="stat-item"><span class="stat-label">Winrate</span><span class="stat-value val-green" id="stat-winrate">0%</span></div>
+<div class="stat-item"><span class="stat-label">Net R</span><span class="stat-value val-green" id="stat-netr">+0.0</span></div>
+<div class="stat-item"><span class="stat-label">Net %</span><span class="stat-value val-green" id="stat-netpct">+0.00</span></div>
+<div class="stat-item"><span class="stat-label">Plan OK</span><span class="stat-value val-orange" id="stat-plan">0%</span></div>
+<div class="stat-item"><span class="stat-label">Discipline</span><span class="stat-value val-green">1</span></div>
 </div>
-
+<div class="chart-container"><canvas id="equityChart"></canvas></div>
+<div class="section-title">Par signal</div>
+<div class="table-card"><table><thead><tr><th></th><th class="text-center">N</th><th class="text-center">W</th><th class="text-right">NET R</th></tr></thead><tbody id="tbody-signal"></tbody></table></div>
+<div class="section-title">Par session</div>
+<div class="table-card"><table><thead><tr><th></th><th class="text-center">N</th><th class="text-center">W</th><th class="text-right">NET R</th></tr></thead><tbody id="tbody-session"></tbody></table></div>
+<div class="section-title">Historique récent</div>
+<div class="trade-list" id="trade-list"></div>
+</div>
 <div class="fab-container">
-    <button class="fab fab-export" onclick="exportData()">EXPORT</button>
-    <button class="fab fab-add" onclick="openModal()">+</button>
+<button class="fab fab-export" onclick="exportData()">EXPORT</button>
+<button class="fab fab-add" onclick="openModal()">+</button>
 </div>
-
 <div class="modal-overlay" id="addModal">
-    <div class="modal">
-        <h2>+ AJOUT TRADE</h2>
-        <div class="form-row">
-            <div class="form-group"><label>Date</label><input type="date" id="inp-date"></div>
-            <div class="form-group"><label>Heure</label><input type="time" id="inp-time"></div>
-        </div>
-        <div class="form-row">
-            <div class="form-group"><label>Paire</label><input type="text" id="inp-pair" placeholder="BTCUSDT"></div>
-            <div class="form-group"><label>Sens</label><select id="inp-sens"><option value="LONG">LONG</option><option value="SHORT">SHORT</option></select></div>
-        </div>
-        <div class="form-row">
-            <div class="form-group"><label>Signal</label><select id="inp-signal"><option value="ENG">ENG</option><option value="PIN">PIN</option><option value="HUNT">HUNT</option><option value="PIN+AR">PIN+AR</option><option value="ENG 15m">ENG 15m</option><option value="ENG 3m">ENG 3m</option></select></div>
-            <div class="form-group"><label>Session</label><select id="inp-session"><option value="LONDRES">LONDRES</option><option value="NY">NY</option><option value="ASIE">ASIE</option><option value="HORS KILLZONE">HORS KILLZONE</option></select></div>
-        </div>
-        <div class="form-row">
-            <div class="form-group"><label>Grade</label><select id="inp-grade"><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div>
-            <div class="form-group"><label>Risque %</label><input type="number" id="inp-risk" value="0.3" step="0.05"></div>
-        </div>
-        <div class="form-row">
-            <div class="form-group"><label>RR prévu</label><input type="number" id="inp-rr-plan" value="3.0" step="0.1"></div>
-            <div class="form-group"><label>RR réalisé</label><input type="number" id="inp-rr-real" value="0.0" step="0.1"></div>
-        </div>
-        <div class="form-row">
-            <div class="form-group"><label>Statut</label><select id="inp-status"><option value="Closed">Closed</option><option value="Annulé">Annulé</option><option value="Open">Open</option></select></div>
-            <div class="form-group"><label>Plan OK</label><select id="inp-plan"><option value="OUI">OUI</option><option value="NON">NON</option></select></div>
-        </div>
-        <div class="form-group"><label>Notes</label><textarea id="inp-notes" rows="2" placeholder="Leçon du trade..."></textarea></div>
-        <button class="btn-save" onclick="saveTrade()">ENREGISTRER</button>
-        <button class="btn-cancel" onclick="closeModal()">ANNULER</button>
-    </div>
+<div class="modal">
+<h2>+ AJOUT TRADE</h2>
+<div class="form-row"><div class="form-group"><label>Date</label><input type="date" id="inp-date"></div><div class="form-group"><label>Heure</label><input type="time" id="inp-time"></div></div>
+<div class="form-row"><div class="form-group"><label>Paire</label><input type="text" id="inp-pair" placeholder="BTCUSDT"></div><div class="form-group"><label>Sens</label><select id="inp-sens"><option value="LONG">LONG</option><option value="SHORT">SHORT</option></select></div></div>
+<div class="form-row"><div class="form-group"><label>Signal</label><select id="inp-signal"><option value="ENG">ENG</option><option value="PIN">PIN</option><option value="HUNT">HUNT</option><option value="PIN+AR">PIN+AR</option><option value="ENG 15m">ENG 15m</option><option value="ENG 3m">ENG 3m</option></select></div><div class="form-group"><label>Session</label><select id="inp-session"><option value="LONDRES">LONDRES</option><option value="NY">NY</option><option value="ASIE">ASIE</option><option value="HORS KILLZONE">HORS KILLZONE</option></select></div></div>
+<div class="form-row"><div class="form-group"><label>Grade</label><select id="inp-grade"><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div><div class="form-group"><label>Risque %</label><input type="number" id="inp-risk" value="0.3" step="0.05"></div></div>
+<div class="form-row"><div class="form-group"><label>RR prévu</label><input type="number" id="inp-rr-plan" value="3.0" step="0.1"></div><div class="form-group"><label>RR réalisé</label><input type="number" id="inp-rr-real" value="0.0" step="0.1"></div></div>
+<div class="form-row"><div class="form-group"><label>Statut</label><select id="inp-status"><option value="Closed">Closed</option><option value="Annulé">Annulé</option><option value="Open">Open</option></select></div><div class="form-group"><label>Plan OK</label><select id="inp-plan"><option value="OUI">OUI</option><option value="NON">NON</option></select></div></div>
+<div class="form-group"><label>Notes</label><textarea id="inp-notes" rows="2" placeholder="Leçon du trade..."></textarea></div>
+<button class="btn-save" onclick="saveTrade()">ENREGISTRER</button>
+<button class="btn-cancel" onclick="closeModal()">ANNULER</button>
 </div>
-
-<div class="toast" id="toast">Sauvegardé ! N'oublie pas d'EXPORTER.</div>
-
+</div>
+<div class="toast" id="toast"></div>
 <script>
-    let trades = [
-        {"Date ":"19/08 ","Heure ":"? ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"HUNT ","Session ":"NY ","Grade ":"? ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":2.3,"Résultat % ":0.71,"RR réalisé ":2.38,"Plan OK ":"OUI ","Notes ":"Partiels + SL à BE, full TP (entrée 64383,8) "},
-        {"Date ":"19/08 ","Heure ":"? ","Paire ":"NAS100 ","Sens ":"LONG ","Signal ":"HUNT ","Session ":"NY ","Grade ":"? ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":1.0,"Résultat % ":-0.3,"RR réalisé ":-1.0,"Plan OK ":"OUI ","Notes ":"Stop touché, biais baissier ensuite "},
-        {"Date ":"20/08 ","Heure ":"09:10 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"ENG ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":4.1,"Résultat % ":1.3,"RR réalisé ":4.5,"Plan OK ":"OUI ","Notes ":"Full TP, ROI +11,34% (x10), fill 69776 "},
-        {"Date ":"20/08 ","Heure ":"09:00 ","Paire ":"XAUUSD ","Sens ":"LONG ","Signal ":"PIN+AR ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":2.0,"Résultat % ":-0.3,"RR réalisé ":-1.0,"Plan OK ":"OUI ","Notes ":"SL touché. Long en structure 5m baissière → leçon : vérifier tendance HTF avant de catcher un discount "},
-        {"Date ":"21/08 ","Heure ":"09:18 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"ENG ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":2.7,"Résultat % ":0.8,"RR réalisé ":2.7,"Plan OK ":"OUI ","Notes ":"TP full, entrée 3m "},
-        {"Date ":"21/08 ","Heure ":"09:42 ","Paire ":"SOLUSDT ","Sens ":"LONG ","Signal ":"PIN ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":3.5,"Résultat % ":1.1,"RR réalisé ":3.5,"Plan OK ":"OUI ","Notes ":"TP full, entrée 3m, corrélé BTC "},
-        {"Date ":"21/08 ","Heure ":"10:10 ","Paire ":"XAUUSD ","Sens ":"LONG ","Signal ":"ENG ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":3.0,"Résultat % ":0.9,"RR réalisé ":3.0,"Plan OK ":"OUI ","Notes ":"TP full, entrée 5m "},
-        {"Date ":"21/08 ","Heure ":"15:00 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"PIN ","Session ":"NY ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":3.0,"Résultat % ":-0.3,"RR réalisé ":-1.0,"Plan OK ":"OUI ","Notes ":"SL touché. PIN 3m à l'equilibrium, HTF haussier OK, session OK "},
-        {"Date ":"21/08 ","Heure ":"15:24 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"PIN ","Session ":"NY ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":3.0,"Résultat % ":-0.3,"RR réalisé ":-1.0,"Plan OK ":"OUI ","Notes ":"SL touché dim 6h. Trade gardé le week-end → nouvelle règle : BE ou clôture avant le week-end "},
-        {"Date ":"24/08 ","Heure ":"04:45 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"ENG 15m ","Session ":"Hors session ","Grade ":"— ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":3.0,"Résultat % ":-0.3,"RR réalisé ":-1.0,"Plan OK ":"NON ","Notes ":"Signal sorti 4h45 = hors fenêtre de tir → violation. SL touché ~10h. Leçon : setups uniquement 8h-11h / 14h-17h "},
-        {"Date ":"24/08 ","Heure ":"10:30 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"ENG 3m ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":5.3,"Résultat % ":-0.3,"RR réalisé ":-1.0,"Plan OK ":"OUI ","Notes ":"SL touché. Setup propre (killzone+HTF+protection) mais marché choppy post-week-end. Trade perdant MAIS discipliné. Circuit breaker activé. "},
-        {"Date ":"24/08 ","Heure ":"09:40 ","Paire ":"SOLUSDT ","Sens ":"LONG ","Signal ":"PIN ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":4.2,"Résultat % ":1.34,"RR réalisé ":4.47,"Plan OK ":"OUI ","Notes ":"Full TP pendant la nuit. Zéro micro-management. La patience paie. "},
-        {"Date ":"25/08 ","Heure ":"08:27 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"ENG 5m ","Session ":"Londres ","Grade ":"A ","Statut ":"Annulé ","Risque % ":0.3,"RR prévu ":19.2,"Résultat % ":0.0,"RR réalisé ":0.0,"Plan OK ":"NON ","Notes ":"Limit non rempli à 11h → annulé selon règle. 0 trade = 0 perte. Victoire de discipline. "},
-        {"Date ":"2026-08-20 ","Heure ":"14:22 ","Paire ":"SOL/USDT.P ","Sens ":"LONG ","Signal ":"ENG ","Session ":"LONDRES ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":4.75,"Résultat % ":1.73,"RR réalisé ":4.75,"Plan OK ":"OUI ","Notes ":"Parfait j'ai laissé tourné et il à réagi  "},
-        {"Date ":"2026-08-26 ","Heure ":"17:06 ","Paire ":"XAU/USDT ","Sens ":"LONG ","Signal ":"ENG ","Session ":"NY ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":6.0,"Résultat % ":0.0,"RR réalisé ":0.0,"Plan OK ":"OUI ","Notes ":"J'ai laissé le setup courir après une session je devais enlever le limit  "},
-        {"Date ":"2026-08-27 ","Heure ":"08:50 ","Paire ":"BTCCUSD.P ","Sens ":"LONG ","Signal ":"ENG ","Session ":"LONDRES ","Grade ":"A ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":4.1,"Résultat % ":1.23,"RR réalisé ":4.1,"Plan OK ":"OUI ","Notes ":"C'était un super setup grâce à lusdt.d anticiper c'est aller très vite  "}
-    ];
-
-    let equityChartInstance = null;
-
-    function getVal(obj, key) { return obj[key] !== undefined ? obj[key] : (obj[key+" "] !== undefined ? obj[key+" "] : obj[" "+key] !== undefined ? obj[" "+key] : ""); }
-
-    function init() {
-        renderStats(); renderTables(); renderList(); renderChart();
-        document.getElementById('inp-date').valueAsDate = new Date();
-        const now = new Date();
-        document.getElementById('inp-time').value = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-    }
-
-    function renderStats() {
-        const closedTrades = trades.filter(t => getVal(t, "Statut").trim() === "Closed");
-        const totalClosed = closedTrades.length;
-        let wins = 0, netR = 0, netPct = 0, planOkCount = 0;
-
-        closedTrades.forEach(t => {
-            const rr = parseFloat(getVal(t, "RR réalisé")) || 0;
-            const pct = parseFloat(getVal(t, "Résultat %")) || 0;
-            netR += rr; netPct += pct;
-            if (rr > 0) wins++;
-            if (getVal(t, "Plan OK").trim() === "OUI") planOkCount++;
-        });
-
-        const winrate = totalClosed > 0 ? ((wins / totalClosed) * 100).toFixed(0) : 0;
-        const planPct = totalClosed > 0 ? ((planOkCount / totalClosed) * 100).toFixed(0) : 0;
-
-        document.getElementById('total-trades-badge').innerText = `${trades.length} trades`;
-        document.getElementById('stat-closed').innerText = totalClosed;
-        
-        const elWinrate = document.getElementById('stat-winrate');
-        elWinrate.innerText = `${winrate}%`; elWinrate.className = `stat-value ${winrate >= 50 ? 'val-green' : 'val-red'}`;
-
-        const elNetR = document.getElementById('stat-netr');
-        elNetR.innerText = `${netR > 0 ? '+' : ''}${netR.toFixed(1)}`; elNetR.className = `stat-value ${netR >= 0 ? 'val-green' : 'val-red'}`;
-
-        const elNetPct = document.getElementById('stat-netpct');
-        elNetPct.innerText = `${netPct > 0 ? '+' : ''}${netPct.toFixed(2)}`; elNetPct.className = `stat-value ${netPct >= 0 ? 'val-green' : 'val-red'}`;
-
-        const elPlan = document.getElementById('stat-plan');
-        elPlan.innerText = `${planPct}%`; elPlan.className = `stat-value ${planPct >= 90 ? 'val-green' : 'val-orange'}`;
-    }
-
-    function renderTables() {
-        const closedTrades = trades.filter(t => getVal(t, "Statut").trim() === "Closed");
-        const signals = {}, sessions = {};
-        
-        closedTrades.forEach(t => {
-            const sig = getVal(t, "Signal").trim();
-            if (!signals[sig]) signals[sig] = { n: 0, w: 0, netR: 0 };
-            signals[sig].n++;
-            const rr = parseFloat(getVal(t, "RR réalisé")) || 0;
-            signals[sig].netR += rr; if (rr > 0) signals[sig].w++;
-
-            let ses = getVal(t, "Session").trim().toUpperCase();
-            if (ses === "LONDRES" || ses === "LONDON") ses = "LONDRES";
-            if (ses === "HORS SESSION" || ses === "HORS KILLZONE") ses = "HORS KILLZONE";
-            if (!sessions[ses]) sessions[ses] = { n: 0, w: 0, netR: 0 };
-            sessions[ses].n++;
-            sessions[ses].netR += rr; if (rr > 0) sessions[ses].w++;
-        });
-
-        const tbodySig = document.getElementById('tbody-signal'); tbodySig.innerHTML = '';
-        Object.keys(signals).sort((a,b) => signals[b].netR - signals[a].netR).forEach(sig => {
-            const d = signals[sig]; const c = d.netR >= 0 ? 'val-green' : 'val-red';
-            tbodySig.innerHTML += `<tr><td style="font-weight:bold">${sig}</td><td class="text-center">${d.n}</td><td class="text-center">${d.w}</td><td class="text-right ${c}">${d.netR > 0 ? '+' : ''}${d.netR.toFixed(1)}</td></tr>`;
-        });
-
-        const tbodySes = document.getElementById('tbody-session'); tbodySes.innerHTML = '';
-        Object.keys(sessions).sort((a,b) => sessions[b].netR - sessions[a].netR).forEach(ses => {
-            const d = sessions[ses]; const c = d.netR >= 0 ? 'val-green' : 'val-red';
-            tbodySes.innerHTML += `<tr><td style="font-weight:bold">${ses}</td><td class="text-center">${d.n}</td><td class="text-center">${d.w}</td><td class="text-right ${c}">${d.netR > 0 ? '+' : ''}${d.netR.toFixed(1)}</td></tr>`;
-        });
-    }
-
-    function renderList() {
-        const list = document.getElementById('trade-list'); list.innerHTML = '';
-        [...trades].reverse().slice(0, 10).forEach(t => {
-            const pair = getVal(t, "Paire").trim(), date = getVal(t, "Date").trim(), sig = getVal(t, "Signal").trim();
-            const rr = parseFloat(getVal(t, "RR réalisé")) || 0, status = g
+let trades = [{"Date ":"19/08 ","Heure ":"? ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"HUNT ","Session ":"NY ","Grade ":"? ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":2.3,"Résultat % ":0.71,"RR réalisé ":2.38,"Plan OK ":"OUI ","Notes ":"Partiels + SL à BE, full TP (entrée 64383,8) "},{"Date ":"19/08 ","Heure ":"? ","Paire ":"NAS100 ","Sens ":"LONG ","Signal ":"HUNT ","Session ":"NY ","Grade ":"? ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":1.0,"Résultat % ":-0.3,"RR réalisé ":-1.0,"Plan OK ":"OUI ","Notes ":"Stop touché, biais baissier ensuite "},{"Date ":"20/08 ","Heure ":"09:10 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"ENG ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":4.1,"Résultat % ":1.3,"RR réalisé ":4.5,"Plan OK ":"OUI ","Notes ":"Full TP, ROI +11,34% (x10), fill 69776 "},{"Date ":"20/08 ","Heure ":"09:00 ","Paire ":"XAUUSD ","Sens ":"LONG ","Signal ":"PIN+AR ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":2.0,"Résultat % ":-0.3,"RR réalisé ":-1.0,"Plan OK ":"OUI ","Notes ":"SL touché. Long en structure 5m baissière → leçon : vérifier tendance HTF avant de catcher un discount "},{"Date ":"21/08 ","Heure ":"09:18 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"ENG ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":2.7,"Résultat % ":0.8,"RR réalisé ":2.7,"Plan OK ":"OUI ","Notes ":"TP full, entrée 3m "},{"Date ":"21/08 ","Heure ":"09:42 ","Paire ":"SOLUSDT ","Sens ":"LONG ","Signal ":"PIN ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":3.5,"Résultat % ":1.1,"RR réalisé ":3.5,"Plan OK ":"OUI ","Notes ":"TP full, entrée 3m, corrélé BTC "},{"Date ":"21/08 ","Heure ":"10:10 ","Paire ":"XAUUSD ","Sens ":"LONG ","Signal ":"ENG ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":3.0,"Résultat % ":0.9,"RR réalisé ":3.0,"Plan OK ":"OUI ","Notes ":"TP full, entrée 5m "},{"Date ":"21/08 ","Heure ":"15:00 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"PIN ","Session ":"NY ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":3.0,"Résultat % ":-0.3,"RR réalisé ":-1.0,"Plan OK ":"OUI ","Notes ":"SL touché. PIN 3m à l'equilibrium, HTF haussier OK, session OK "},{"Date ":"21/08 ","Heure ":"15:24 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"PIN ","Session ":"NY ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":3.0,"Résultat % ":-0.3,"RR réalisé ":-1.0,"Plan OK ":"OUI ","Notes ":"SL touché dim 6h. Trade gardé le week-end → nouvelle règle : BE ou clôture avant le week-end "},{"Date ":"24/08 ","Heure ":"04:45 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"ENG 15m ","Session ":"Hors session ","Grade ":"— ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":3.0,"Résultat % ":-0.3,"RR réalisé ":-1.0,"Plan OK ":"NON ","Notes ":"Signal sorti 4h45 = hors fenêtre de tir → violation. SL touché ~10h. Leçon : setups uniquement 8h-11h / 14h-17h "},{"Date ":"24/08 ","Heure ":"10:30 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"ENG 3m ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":5.3,"Résultat % ":-0.3,"RR réalisé ":-1.0,"Plan OK ":"OUI ","Notes ":"SL touché. Setup propre (killzone+HTF+protection) mais marché choppy post-week-end. Trade perdant MAIS discipliné. Circuit breaker activé. "},{"Date ":"24/08 ","Heure ":"09:40 ","Paire ":"SOLUSDT ","Sens ":"LONG ","Signal ":"PIN ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":4.2,"Résultat % ":1.34,"RR réalisé ":4.47,"Plan OK ":"OUI ","Notes ":"Full TP pendant la nuit. Zéro micro-management. La patience paie. "},{"Date ":"25/08 ","Heure ":"08:27 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"ENG 5m ","Session ":"Londres ","Grade ":"A ","Statut ":"Annulé ","Risque % ":0.3,"RR prévu ":19.2,"Résultat % ":0.0,"RR réalisé ":0.0,"Plan OK ":"NON ","Notes ":"Limit non rempli à 11h → annulé selon règle. 0 trade = 0 perte. Victoire de discipline. "},{"Date ":"2026-08-20 ","Heure ":"14:22 ","Paire ":"SOL/USDT.P ","Sens ":"LONG ","Signal ":"ENG ","Session ":"LONDRES ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":4.75,"Résultat % ":1.73,"RR réalisé ":4.75,"Plan OK ":"OUI ","Notes ":"Parfait j'ai laissé tourné et il à réagi  "},{"Date ":"2026-08-26 ","Heure ":"17:06 ","Paire ":"XAU/USDT ","Sens ":"LONG ","Signal ":"ENG ","Session ":"NY ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":6.0,"Résultat % ":0.0,"RR réalisé ":0.0,"Plan OK ":"OUI ","Notes ":"J'ai laissé le setup courir après une session je devais enlever le limit  "},{"Date ":"2026-08-27 ","Heure ":"08:50 ","Paire ":"BTCCUSD.P ","Sens ":"LONG ","Signal ":"ENG ","Session ":"LONDRES ","Grade ":"A ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":4.1,"Résultat % ":1.23,"RR réalisé ":4.1,"Plan OK ":"OUI ","Notes ":"C'était un super setup grâce à lusdt.d anticiper c'est aller très vite  "}];
+let equityChartInstance=null;
+function getVal(o,k){return o[k]!==undefined?o[k]:(o[k+" "]!==undefined?o[k+" "]:(o[" "+k]!==undefined?o[" "+k]:""))}
+function init(){renderStats();renderTables();renderList();renderChart();document.getElementById('inp-date').valueAsDate=new Date();const n=new Date();document.getElementById('inp-time').value=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0')}
+function renderStats(){const c=trades.filter(t=>getVal(t,"Statut").trim()==="Closed");const tot=c.length;let w=0,nr=0,np=0,pok=0;c.forEach(t=>{const rr=parseFloat(getVal(t,"RR réalisé"))||0;const p=parseFloat(getVal(t,"Résultat %"))||0;nr+=rr;np+=p;if(rr>0)w++;if(getVal(t,"Plan OK").trim()==="OUI")pok++});const wr=tot>0?((w/tot)*100).toFixed(0):0;const pp=tot>0?((pok/tot)*100).toFixed(0):0;document.getElementById('total-trades-badge').innerText=trades.length+" trades";document.getElementById('stat-closed').innerText=tot;const ew=document.getElementById('stat-winrate');ew.innerText=wr+"%";ew.className="stat-value "+(wr>=50?'val-green':'val-red');const er=document.getElementById('stat-netr');er.innerText=(nr>0?'+':'')+nr.toFixed(1);er.className="stat-value "+(nr>=0?'val-green':'val-red');const ep=document.getElementById('stat-netpct');ep.innerText=(np>0?'+':'')+np.toFixed(2);ep.className="stat-value "+(np>=0?'val-green':'val-red');const epl=document.getElementById('stat-plan');epl.innerText=pp+"%";epl.className="stat-value "+(pp>=90?'val-green':'val-orange')}
+function renderTables(){const c=trades.filter(t=>getVal(t,"Statut").trim()==="Closed");const sig={},ses={};c.forEach(t=>{const s=getVal(t,"Signal").trim();if(!sig[s])sig[s]={n:0,w:0,r:0};sig[s].n++;const rr=parseFloat(getVal(t,"RR réalisé"))||0;sig[s].r+=rr;if(rr>0)sig[s].w++;let se=getVal(t,"Session").trim().toUpperCase();if(se==="LONDRES"||se==="LONDON")se="LONDRES";if(se==="HORS SESSION"||se==="HORS KILLZONE")se="HORS KILLZONE";if(!ses[se])ses[se]={n:0,w:0,r:0};ses[se].n++;ses[se].r+=rr;if(rr>0)ses[se].w++});const ts=document.getElementById('tbody-signal');ts.innerHTML='';Object.keys(sig).sort((a,b)=>sig[b].r-sig[a].r).forEach(s=>{const d=sig[s];const cl=d.r>=0?'val-green':'val-red';ts.innerHTML+='<tr><td style="font-weight:bold">'+s+'</td><td class="text-center">'+d.n+'</td><td class="text-center">'+d.w+'</td><td class="text-right '+cl+'">'+(d.r>0?'+':'')+d.r.toFixed(1)+'</td></tr>'});const tse=document.getElementById('tbody-session');tse.innerHTML='';Object.keys(ses).sort((a,b)=>ses[b].r-ses[a].r).forEach(s=>{const d=ses[s];const cl=d.r>=0?'val-green':'val-red';tse.innerHTML+='<tr><td style="font-weight:bold">'+s+'</td><td class="text-center">'+d.n+'</td><td class="text-center">'+d.w+'</td><td class="text-right '+cl+'">'+(d.r>0?'+':'')+d.r.toFixed(1)+'</td></tr>'})}
+function renderList(){const l=document.getElementById('trade-list');l.innerHTML='';[...trades].reverse().slice(0,10).forEach(t=>{const p=getVal(t,"Paire").trim(),d=getVal(t,"Date").trim(),s=getVal(t,"Signal").trim(),rr=parseFloat(getVal(t,"RR réalisé"))||0,st=getVal(t,"Statut").trim();let rt=st==="Annulé"?"ANNULÉ":((rr>0?'+':'')+rr.toFixed(1)+'R');let cl=st==="Annulé"?'val-orange':(rr>=0?'val-green':'val-red');l.innerHTML+='<div class="trade-item"><div class="trade-info"><span class="trade-pair">'+p+' <span style="font-size:.8em;color:var(--muted);font-weight:normal">('+s+')</span></span><span class="trade-meta">'+d+'</span></div><div class="trade-result '+cl+'">'+rt+'</div></div>'})}
+function renderChart(){const ctx=document.getElementById('equityChart').getContext('2d');const c=trades.filter(t=>getVal(t,"Statut").trim()==="Closed");let cum=0;const dp=[0],lb=['Start'];c.forEach((t,i)=>{cum+=(parseFloat(getVal(t,"RR réalisé"))||0);dp.push(cum);lb.push('T'+(i+1))});if(equityChartInstance)equityChartInstance.destroy();equityChartInstance=new Chart(ctx,{type:'line',data:{labels:lb,datasets:[{label:'Net R',data:dp,borderColor:'#0ecb81',backgroundColor:'rgba(14,203,129,0.1)',borderWidth:2,fill:true,tension:0.3,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{grid:{color:'#2b3139'},ticks:{color:'#848e9c'}}}}})}
+function openModal(){document.getElementById('addModal').style.display='flex'}
+function closeModal(){document.getElementById('addModal').style.display='none'}
+function saveTrade(){const nt={"Date ":document.getElementById('inp-date').value,"Heure ":document.getElementById('inp-time').value,"Paire ":document.getElementById('inp-pair').value.toUpperCase(),"Sens ":document.getElementById('inp-sens').value,"Signal ":document.getElementById('inp-signal').value,"Session ":document.getElementById('inp-session').value,"Grade ":document.getElementById('inp-grade').value,"Statut ":document.getElementById('inp-status').value,"Risque % ":parseFloat(document.getElementById('inp-risk').value),"RR prévu ":parseFloat(document.getElementById('inp-rr-plan').value),"RR réalisé ":parseFloat(document.getElementById('inp-rr-real').value),"Plan OK ":document.getElementById('inp-plan').value,"Notes ":document.getElementById('inp-notes').value,"Résultat % ":0};if(nt["Statut "]==="Closed")nt["Résultat % "]=parseFloat((nt["Risque % "]*nt["RR réalisé "]).toFixed(2));trades.push(nt);renderStats();renderTables();renderList();renderChart();closeModal();showToast();document.getElementById('inp-pair').value='';document.getElementById('inp-notes').value='';document.getElementById('inp-rr-real').value='0.0'}
+function exportData(){const ds="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(trades,null,2));const a=document.createElement('a');a.setAttribute("href",ds);a.setAttribute("download","ghost_journal.json");document.body.appendChild(a);a.click();a.remove();showToast("JSON Téléchargé ! Push sur GitHub.")}
+function showToast(m){const t=document.getElementById('toast');t.innerText=m||"Sauvegardé ! N'oublie pas d'EXPORTER.";t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+window.onload=init;
+</script>
+</body>
+    </html>
