@@ -6,144 +6,129 @@
 <title>Ghost Journal V5</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-:root{--bg:#0b0e11;--card:#151924;--text:#eaecef;--muted:#848e9c;--green:#0ecb81;--red:#f6465d;--orange:#f0b90b;--border:#2b3139;--blue:#3b82f6}
-*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-body{background:var(--bg);color:var(--text);padding:20px;padding-bottom:80px}
-.container{max-width:800px;margin:0 auto}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:15px;border-bottom:1px solid var(--border)}
-h1{font-size:1.4rem;display:flex;align-items:center;gap:10px}
-.badge{background:var(--card);padding:5px 10px;border-radius:4px;font-size:.85rem;color:var(--muted);border:1px solid var(--border)}
-.stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px;background:var(--card);padding:20px;border-radius:12px;margin-bottom:20px;border:1px solid var(--border)}
-.stat-item{display:flex;flex-direction:column;gap:5px}
-.stat-label{color:var(--muted);font-size:.82rem}
-.stat-value{font-size:1.35rem;font-weight:bold}
-.val-green{color:var(--green)}.val-red{color:var(--red)}.val-orange{color:var(--orange)}
-.chart-container{background:var(--card);padding:20px;border-radius:12px;margin-bottom:20px;border:1px solid var(--border);height:240px;position:relative}
-.section-title{color:var(--orange);font-size:1.05rem;margin-bottom:10px;font-weight:bold}
-.table-card{background:var(--card);padding:15px;border-radius:12px;margin-bottom:20px;border:1px solid var(--border);overflow-x:auto}
-table{width:100%;border-collapse:collapse;min-width:380px}
-th{text-align:left;color:var(--muted);font-size:.78rem;padding:10px 5px;border-bottom:1px solid var(--border);text-transform:uppercase}
-td{padding:12px 5px;border-bottom:1px solid var(--border);font-size:.88rem}
-tr:last-child td{border-bottom:none}
-.text-right{text-align:right}.text-center{text-align:center}
-.trade-list{display:flex;flex-direction:column;gap:10px}
-.trade-item{background:var(--card);padding:15px;border-radius:8px;border:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
-.trade-info{display:flex;flex-direction:column;gap:4px}
-.trade-pair{font-weight:bold;font-size:.98rem}
-.trade-meta{color:var(--muted);font-size:.78rem}
-.trade-result{font-weight:bold;font-size:1.05rem}
-.fab-container{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:10px;z-index:100}
-.fab{height:56px;border-radius:28px;border:none;display:flex;justify-content:center;align-items:center;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.5);font-weight:bold}
-.fab:active{transform:scale(.95)}
-.fab-add{width:56px;background:var(--green);color:#000;font-size:26px}
-.fab-export{padding:0 18px;background:var(--orange);color:#000;font-size:14px}
-.fab-import{padding:0 18px;background:var(--blue);color:#fff;font-size:14px}
-.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;z-index:200;padding:20px}
-.modal{background:var(--card);padding:20px;border-radius:12px;width:100%;max-width:500px;border:1px solid var(--border);max-height:90vh;overflow-y:auto}
-.modal h2{margin-bottom:15px;font-size:1.15rem}
-.form-group{margin-bottom:12px}
-.form-group label{display:block;color:var(--muted);font-size:.78rem;margin-bottom:5px}
-.form-group input,.form-group select,.form-group textarea{width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:.88rem}
-.form-row{display:flex;gap:10px}.form-row .form-group{flex:1}
-.btn-save{width:100%;padding:12px;background:var(--green);color:#000;border:none;border-radius:6px;font-weight:bold;font-size:1rem;cursor:pointer;margin-top:10px}
-.btn-cancel{width:100%;padding:12px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:6px;font-size:1rem;cursor:pointer;margin-top:10px}
-.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--green);color:#000;padding:10px 20px;border-radius:20px;font-weight:bold;opacity:0;transition:opacity .3s;pointer-events:none;z-index:300}
+:root{--bg:#0b0e11;--c:#151924;--t:#eaecef;--m:#848e9c;--g:#0ecb81;--r:#f6465d;--o:#f0b90b;--b:#2b3139;--bl:#3b82f6}
+*{box-sizing:border-box;margin:0;padding:0;font-family:sans-serif}
+body{background:var(--bg);color:var(--t);padding:16px;padding-bottom:90px}
+h1{font-size:1.3rem;margin-bottom:12px}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:10px;background:var(--c);padding:16px;border-radius:10px;margin-bottom:14px;border:1px solid var(--b)}
+.si{display:flex;flex-direction:column;gap:3px}
+.sl{color:var(--m);font-size:.75rem}
+.sv{font-size:1.2rem;font-weight:bold}
+.g{color:var(--g)}.r{color:var(--r)}.o{color:var(--o)}
+.cc{background:var(--c);padding:14px;border-radius:10px;margin-bottom:14px;border:1px solid var(--b);height:200px;position:relative}
+.st{color:var(--o);font-size:.95rem;margin-bottom:8px;font-weight:bold}
+.tc{background:var(--c);padding:12px;border-radius:10px;margin-bottom:14px;border:1px solid var(--b);overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;color:var(--m);font-size:.72rem;padding:8px 4px;border-bottom:1px solid var(--b)}
+td{padding:10px 4px;border-bottom:1px solid var(--b);font-size:.82rem}
+.tr{text-align:right}.tt{text-align:center}
+.tl{display:flex;flex-direction:column;gap:8px}
+.ti{background:var(--c);padding:12px;border-radius:8px;border:1px solid var(--b);display:flex;justify-content:space-between;align-items:center}
+.tp{font-weight:bold;font-size:.9rem}
+.tm{color:var(--m);font-size:.72rem}
+.tv{font-weight:bold;font-size:1rem}
+.fc{position:fixed;bottom:16px;right:16px;display:flex;flex-direction:column;gap:8px;z-index:100}
+.fb{height:50px;border-radius:25px;border:none;display:flex;justify-content:center;align-items:center;cursor:pointer;font-weight:bold;box-shadow:0 3px 10px rgba(0,0,0,.5)}
+.fb:active{transform:scale(.95)}
+.fa{width:50px;background:var(--g);color:#000;font-size:24px}
+.fe{padding:0 16px;background:var(--o);color:#000;font-size:13px}
+.fi{padding:0 16px;background:var(--bl);color:#fff;font-size:13px}
+.mo{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;z-index:200;padding:16px}
+.md{background:var(--c);padding:16px;border-radius:10px;width:100%;max-width:500px;border:1px solid var(--b);max-height:90vh;overflow-y:auto}
+.md h2{margin-bottom:12px;font-size:1.1rem}
+.fg{margin-bottom:10px}
+.fg label{display:block;color:var(--m);font-size:.72rem;margin-bottom:4px}
+.fg input,.fg select,.fg textarea{width:100%;padding:8px;background:var(--bg);border:1px solid var(--b);color:var(--t);border-radius:5px;font-size:.82rem}
+.fr{display:flex;gap:8px}.fr .fg{flex:1}
+.bs{width:100%;padding:10px;background:var(--g);color:#000;border:none;border-radius:5px;font-weight:bold;font-size:.95rem;cursor:pointer;margin-top:8px}
+.bc{width:100%;padding:10px;background:transparent;color:var(--m);border:1px solid var(--b);border-radius:5px;font-size:.95rem;cursor:pointer;margin-top:8px}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--g);color:#000;padding:8px 16px;border-radius:16px;font-weight:bold;opacity:0;transition:opacity .3s;pointer-events:none;z-index:300;font-size:.85rem}
 .toast.show{opacity:1}
 </style>
 </head>
 <body>
-<div class="container">
-<header><h1>🖤 GHOST JOURNAL V5</h1><div class="badge" id="total-trades-badge">0 trades</div></header>
-<div class="stats-grid">
-<div class="stat-item"><span class="stat-label">Trades fermés</span><span class="stat-value" id="stat-closed">0</span></div>
-<div class="stat-item"><span class="stat-label">Winrate</span><span class="stat-value val-green" id="stat-winrate">0%</span></div>
-<div class="stat-item"><span class="stat-label">Net R</span><span class="stat-value val-green" id="stat-netr">+0.0</span></div>
-<div class="stat-item"><span class="stat-label">Net %</span><span class="stat-value val-green" id="stat-netpct">+0.00</span></div>
-<div class="stat-item"><span class="stat-label">Plan OK</span><span class="stat-value val-orange" id="stat-plan">0%</span></div>
-<div class="stat-item"><span class="stat-label">Discipline</span><span class="stat-value val-green">1</span></div>
+<h1>&#x1F5A4; GHOST JOURNAL V5</h1>
+<div class="sg">
+<div class="si"><span class="sl">Trades ferm&#233;s</span><span class="sv" id="s1">0</span></div>
+<div class="si"><span class="sl">Winrate</span><span class="sv g" id="s2">0%</span></div>
+<div class="si"><span class="sl">Net R</span><span class="sv g" id="s3">+0.0</span></div>
+<div class="si"><span class="sl">Net %</span><span class="sv g" id="s4">+0.00</span></div>
+<div class="si"><span class="sl">Plan OK</span><span class="sv o" id="s5">0%</span></div>
+<div class="si"><span class="sl">Trades total</span><span class="sv" id="s6">0</span></div>
 </div>
-<div class="chart-container"><canvas id="equityChart"></canvas></div>
-<div class="section-title">Par signal</div>
-<div class="table-card"><table><thead><tr><th></th><th class="text-center">N</th><th class="text-center">W</th><th class="text-right">NET R</th></tr></thead><tbody id="tbody-signal"></tbody></table></div>
-<div class="section-title">Par session</div>
-<div class="table-card"><table><thead><tr><th></th><th class="text-center">N</th><th class="text-center">W</th><th class="text-right">NET R</th></tr></thead><tbody id="tbody-session"></tbody></table></div>
-<div class="section-title">Historique récent</div>
-<div class="trade-list" id="trade-list"></div>
+<div class="cc"><canvas id="ch"></canvas></div>
+<div class="st">Par signal</div>
+<div class="tc"><table><thead><tr><th></th><th class="tt">N</th><th class="tt">W</th><th class="tr">NET R</th></tr></thead><tbody id="t1"></tbody></table></div>
+<div class="st">Par session</div>
+<div class="tc"><table><thead><tr><th></th><th class="tt">N</th><th class="tt">W</th><th class="tr">NET R</th></tr></thead><tbody id="t2"></tbody></table></div>
+<div class="st">Historique r&#233;cent</div>
+<div class="tl" id="tl"></div>
+<div class="fc">
+<button class="fb fi" onclick="document.getElementById('fi').click()">IMPORT</button>
+<input type="file" id="fi" style="display:none" accept=".json" onchange="imp(this)">
+<button class="fb fe" onclick="exp()">EXPORT</button>
+<button class="fb fa" onclick="openM()">+</button>
 </div>
-
-<div class="fab-container">
-<button class="fab fab-import" onclick="document.getElementById('fileInput').click()">IMPORT</button>
-<input type="file" id="fileInput" style="display:none" accept=".json" onchange="importData(this)">
-<button class="fab fab-export" onclick="exportData()">EXPORT</button>
-<button class="fab fab-add" onclick="openModal()">+</button>
-</div>
-
-<div class="modal-overlay" id="addModal">
-<div class="modal">
+<div class="mo" id="modal">
+<div class="md">
 <h2>+ AJOUT TRADE</h2>
-<div class="form-row"><div class="form-group"><label>Date</label><input type="date" id="inp-date"></div><div class="form-group"><label>Heure</label><input type="time" id="inp-time"></div></div>
-<div class="form-row"><div class="form-group"><label>Paire</label><input type="text" id="inp-pair" placeholder="BTCUSDT"></div><div class="form-group"><label>Sens</label><select id="inp-sens"><option value="LONG">LONG</option><option value="SHORT">SHORT</option></select></div></div>
-<div class="form-row"><div class="form-group"><label>Signal</label><select id="inp-signal"><option value="ENG">ENG</option><option value="PIN">PIN</option><option value="HUNT">HUNT</option><option value="PIN+AR">PIN+AR</option><option value="ENG 15m">ENG 15m</option><option value="ENG 3m">ENG 3m</option></select></div><div class="form-group"><label>Session</label><select id="inp-session"><option value="LONDRES">LONDRES</option><option value="NY">NY</option><option value="ASIE">ASIE</option><option value="HORS KILLZONE">HORS KILLZONE</option></select></div></div>
-<div class="form-row"><div class="form-group"><label>Grade</label><select id="inp-grade"><option value="A">A</option><option value="B">B</option><option value="C">C</option></select></div><div class="form-group"><label>Risque %</label><input type="number" id="inp-risk" value="0.3" step="0.05"></div></div>
-<div class="form-row"><div class="form-group"><label>RR prévu</label><input type="number" id="inp-rr-plan" value="3.0" step="0.1"></div><div class="form-group"><label>RR réalisé</label><input type="number" id="inp-rr-real" value="0.0" step="0.1"></div></div>
-<div class="form-row"><div class="form-group"><label>Statut</label><select id="inp-status"><option value="Closed">Closed</option><option value="Annulé">Annulé</option><option value="Open">Open</option></select></div><div class="form-group"><label>Plan OK</label><select id="inp-plan"><option value="OUI">OUI</option><option value="NON">NON</option></select></div></div>
-<div class="form-group"><label>Notes</label><textarea id="inp-notes" rows="2" placeholder="Leçon du trade..."></textarea></div>
-<button class="btn-save" onclick="saveTrade()">ENREGISTRER</button>
-<button class="btn-cancel" onclick="closeModal()">ANNULER</button>
+<div class="fr"><div class="fg"><label>Date</label><input type="date" id="i1"></div><div class="fg"><label>Heure</label><input type="time" id="i2"></div></div>
+<div class="fr"><div class="fg"><label>Paire</label><input type="text" id="i3" placeholder="BTCUSDT"></div><div class="fg"><label>Sens</label><select id="i4"><option>LONG</option><option>SHORT</option></select></div></div>
+<div class="fr"><div class="fg"><label>Signal</label><select id="i5"><option>ENG</option><option>PIN</option><option>HUNT</option><option>PIN+AR</option><option>ENG 15m</option><option>ENG 3m</option><option>ENG 5m</option></select></div><div class="fg"><label>Session</label><select id="i6"><option>LONDRES</option><option>NY</option><option>ASIE</option><option>HORS KILLZONE</option></select></div></div>
+<div class="fr"><div class="fg"><label>Grade</label><select id="i7"><option>A</option><option>B</option><option>C</option></select></div><div class="fg"><label>Risque %</label><input type="number" id="i8" value="0.3" step="0.05"></div></div>
+<div class="fr"><div class="fg"><label>RR pr&#233;vu</label><input type="number" id="i9" value="3.0" step="0.1"></div><div class="fg"><label>RR r&#233;alis&#233;</label><input type="number" id="i10" value="0.0" step="0.1"></div></div>
+<div class="fr"><div class="fg"><label>Statut</label><select id="i11"><option>Closed</option><option>Annul&#233;</option><option>Open</option></select></div><div class="fg"><label>Plan OK</label><select id="i12"><option>OUI</option><option>NON</option></select></div></div>
+<div class="fg"><label>Notes</label><textarea id="i13" rows="2" placeholder="Le&#231;on du trade..."></textarea></div>
+<button class="bs" onclick="addT()">ENREGISTRER</button>
+<button class="bc" onclick="closeM()">ANNULER</button>
 </div>
 </div>
 <div class="toast" id="toast"></div>
-
 <script>
-// Données de base (tes 16 trades historiques intégrés)
-const baseTrades = [{"Date ":"19/08 ","Heure ":"? ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"HUNT ","Session ":"NY ","Grade ":"? ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":2.3,"Résultat % ":0.71,"RR réalisé ":2.38,"Plan OK ":"OUI ","Notes ":"Partiels + SL à BE, full TP (entrée 64383,8) "},{"Date ":"19/08 ","Heure ":"? ","Paire ":"NAS100 ","Sens ":"LONG ","Signal ":"HUNT ","Session ":"NY ","Grade ":"? ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":1.0,"Résultat % ":-0.3,"RR réalisé ":-1.0,"Plan OK ":"OUI ","Notes ":"Stop touché, biais baissier ensuite "},{"Date ":"20/08 ","Heure ":"09:10 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"ENG ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":4.1,"Résultat % ":1.3,"RR réalisé ":4.5,"Plan OK ":"OUI ","Notes ":"Full TP, ROI +11,34% (x10), fill 69776 "},{"Date ":"20/08 ","Heure ":"09:00 ","Paire ":"XAUUSD ","Sens ":"LONG ","Signal ":"PIN+AR ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":2.0,"Résultat % ":-0.3,"RR réalisé ":-1.0,"Plan OK ":"OUI ","Notes ":"SL touché. Long en structure 5m baissière → leçon : vérifier tendance HTF avant de catcher un discount "},{"Date ":"21/08 ","Heure ":"09:18 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"ENG ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":2.7,"Résultat % ":0.8,"RR réalisé ":2.7,"Plan OK ":"OUI ","Notes ":"TP full, entrée 3m "},{"Date ":"21/08 ","Heure ":"09:42 ","Paire ":"SOLUSDT ","Sens ":"LONG ","Signal ":"PIN ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":3.5,"Résultat % ":1.1,"RR réalisé ":3.5,"Plan OK ":"OUI ","Notes ":"TP full, entrée 3m, corrélé BTC "},{"Date ":"21/08 ","Heure ":"10:10 ","Paire ":"XAUUSD ","Sens ":"LONG ","Signal ":"ENG ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":3.0,"Résultat % ":0.9,"RR réalisé ":3.0,"Plan OK ":"OUI ","Notes ":"TP full, entrée 5m "},{"Date ":"21/08 ","Heure ":"15:00 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"PIN ","Session ":"NY ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":3.0,"Résultat % ":-0.3,"RR réalisé ":-1.0,"Plan OK ":"OUI ","Notes ":"SL touché. PIN 3m à l'equilibrium, HTF haussier OK, session OK "},{"Date ":"21/08 ","Heure ":"15:24 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"PIN ","Session ":"NY ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":3.0,"Résultat % ":-0.3,"RR réalisé ":-1.0,"Plan OK ":"OUI ","Notes ":"SL touché dim 6h. Trade gardé le week-end → nouvelle règle : BE ou clôture avant le week-end "},{"Date ":"24/08 ","Heure ":"04:45 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"ENG 15m ","Session ":"Hors session ","Grade ":"— ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":3.0,"Résultat % ":-0.3,"RR réalisé ":-1.0,"Plan OK ":"NON ","Notes ":"Signal sorti 4h45 = hors fenêtre de tir → violation. SL touché ~10h. Leçon : setups uniquement 8h-11h / 14h-17h "},{"Date ":"24/08 ","Heure ":"10:30 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"ENG 3m ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":5.3,"Résultat % ":-0.3,"RR réalisé ":-1.0,"Plan OK ":"OUI ","Notes ":"SL touché. Setup propre (killzone+HTF+protection) mais marché choppy post-week-end. Trade perdant MAIS discipliné. Circuit breaker activé. "},{"Date ":"24/08 ","Heure ":"09:40 ","Paire ":"SOLUSDT ","Sens ":"LONG ","Signal ":"PIN ","Session ":"Londres ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":4.2,"Résultat % ":1.34,"RR réalisé ":4.47,"Plan OK ":"OUI ","Notes ":"Full TP pendant la nuit. Zéro micro-management. La patience paie. "},{"Date ":"25/08 ","Heure ":"08:27 ","Paire ":"BTCUSDT ","Sens ":"LONG ","Signal ":"ENG 5m ","Session ":"Londres ","Grade ":"A ","Statut ":"Annulé ","Risque % ":0.3,"RR prévu ":19.2,"Résultat % ":0.0,"RR réalisé ":0.0,"Plan OK ":"NON ","Notes ":"Limit non rempli à 11h → annulé selon règle. 0 trade = 0 perte. Victoire de discipline. "},{"Date ":"2026-08-20 ","Heure ":"14:22 ","Paire ":"SOL/USDT.P ","Sens ":"LONG ","Signal ":"ENG ","Session ":"LONDRES ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":4.75,"Résultat % ":1.73,"RR réalisé ":4.75,"Plan OK ":"OUI ","Notes ":"Parfait j'ai laissé tourné et il à réagi  "},{"Date ":"2026-08-26 ","Heure ":"17:06 ","Paire ":"XAU/USDT ","Sens ":"LONG ","Signal ":"ENG ","Session ":"NY ","Grade ":"B ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":6.0,"Résultat % ":0.0,"RR réalisé ":0.0,"Plan OK ":"OUI ","Notes ":"J'ai laissé le setup courir après une session je devais enlever le limit  "},{"Date ":"2026-08-27 ","Heure ":"08:50 ","Paire ":"BTCCUSD.P ","Sens ":"LONG ","Signal ":"ENG ","Session ":"LONDRES ","Grade ":"A ","Statut ":"Closed ","Risque % ":0.3,"RR prévu ":4.1,"Résultat % ":1.23,"RR réalisé ":4.1,"Plan OK ":"OUI ","Notes ":"C'était un super setup grâce à lusdt.d anticiper c'est aller très vite  "}];
-
-let trades = [];
-
-// Chargement des données (Local Storage + Base)
-function loadData() {
-    const stored = localStorage.getItem('ghost_trades_v5');
-    if (stored) {
-        try {
-            const localTrades = JSON.parse(stored);
-            // Fusion : on prend les trades locaux, et on ajoute les trades de base s'ils ne sont pas déjà présents
-            const localKeys = new Set(localTrades.map(t => getVal(t,"Date")+getVal(t,"Heure")+getVal(t,"Paire")));
-            const missingBase = baseTrades.filter(t => !localKeys.has(getVal(t,"Date")+getVal(t,"Heure")+getVal(t,"Paire")));
-            trades = [...localTrades, ...missingBase];
-        } catch (e) {
-            trades = [...baseTrades];
-        }
-    } else {
-        trades = [...baseTrades];
-    }
+function G(o,k){var keys=Object.keys(o);for(var i=0;i<keys.length;i++){if(keys[i].trim()===k){var v=o[keys[i]];return typeof v==="string"?v.trim():v}}return ""}
+var trades=[],ci=null;
+function load(){var s=localStorage.getItem("gj5");if(s){try{trades=JSON.parse(s)}catch(e){trades=[]}}else{trades=[]}}
+function save(){localStorage.setItem("gj5",JSON.stringify(trades))}
+function getRR(t){var v=G(t,"RR r\u00e9alis\u00e9");if(v===""||v===undefined)v=G(t,"RR realise");return parseFloat(v)||0}
+function getRP(t){var v=G(t,"R\u00e9sultat %");if(v===""||v===undefined)v=G(t,"Resultat %");return parseFloat(v)||0}
+function init(){load();render();document.getElementById("i1").valueAsDate=new Date();var n=new Date();document.getElementById("i2").value=("0"+n.getHours()).slice(-2)+":"+("0"+n.getMinutes()).slice(-2)}
+function render(){
+var c=trades.filter(function(t){return G(t,"Statut")==="Closed"});
+var tot=c.length,w=0,nr=0,np=0,pok=0;
+for(var i=0;i<c.length;i++){var rr=getRR(c[i]);var rp=getRP(c[i]);nr+=rr;np+=rp;if(rr>0)w++;if(G(c[i],"Plan OK")==="OUI")pok++}
+var wr=tot>0?Math.round(w/tot*100):0;
+var pp=tot>0?Math.round(pok/tot*100):0;
+document.getElementById("s1").innerText=tot;
+document.getElementById("s6").innerText=trades.length;
+var e2=document.getElementById("s2");e2.innerText=wr+"%";e2.className="sv "+(wr>=50?"g":"r");
+var e3=document.getElementById("s3");e3.innerText=(nr>0?"+":"")+nr.toFixed(1);e3.className="sv "+(nr>=0?"g":"r");
+var e4=document.getElementById("s4");e4.innerText=(np>0?"+":"")+np.toFixed(2);e4.className="sv "+(np>=0?"g":"r");
+var e5=document.getElementById("s5");e5.innerText=pp+"%";e5.className="sv "+(pp>=90?"g":"o");
+var sig={},ses={};
+for(var i=0;i<c.length;i++){var t=c[i];var rr=getRR(t);var s=G(t,"Signal")||"?";if(!sig[s])sig[s]={n:0,w:0,r:0};sig[s].n++;sig[s].r+=rr;if(rr>0)sig[s].w++;var se=(G(t,"Session")||"?").toUpperCase();if(se==="LONDON")se="LONDRES";if(se==="HORS SESSION")se="HORS KILLZONE";if(!ses[se])ses[se]={n:0,w:0,r:0};ses[se].n++;ses[se].r+=rr;if(rr>0)ses[se].w++}
+var h1="";var ks1=Object.keys(sig).sort(function(a,b){return sig[b].r-sig[a].r});
+for(var i=0;i<ks1.length;i++){var k=ks1[i];var d=sig[k];var cl=d.r>=0?"g":"r";h1+='<tr><td style="font-weight:bold">'+k+'</td><td class="tt">'+d.n+'</td><td class="tt">'+d.w+'</td><td class="tr '+cl+'">'+(d.r>0?"+":"")+d.r.toFixed(1)+'</td></tr>'}
+document.getElementById("t1").innerHTML=h1;
+var h2="";var ks2=Object.keys(ses).sort(function(a,b){return ses[b].r-ses[a].r});
+for(var i=0;i<ks2.length;i++){var k=ks2[i];var d=ses[k];var cl=d.r>=0?"g":"r";h2+='<tr><td style="font-weight:bold">'+k+'</td><td class="tt">'+d.n+'</td><td class="tt">'+d.w+'</td><td class="tr '+cl+'">'+(d.r>0?"+":"")+d.r.toFixed(1)+'</td></tr>'}
+document.getElementById("t2").innerHTML=h2;
+var list=trades.slice().reverse().slice(0,10);var hl="";
+for(var i=0;i<list.length;i++){var t=list[i];var p=G(t,"Paire")||"?";var d=G(t,"Date")||"?";var sg=G(t,"Signal")||"?";var rr=getRR(t);var st=G(t,"Statut");var rt=(st==="Annul\u00e9"||st==="Annule")?"ANNULE":((rr>0?"+":"")+rr.toFixed(1)+"R");var cl=(st==="Annul\u00e9"||st==="Annule")?"o":(rr>=0?"g":"r");hl+='<div class="ti"><div><span class="tp">'+p+' <small style="color:var(--m);font-weight:normal">('+sg+')</small></span><br><span class="tm">'+d+'</span></div><div class="tv '+cl+'">'+rt+'</div></div>'}
+document.getElementById("tl").innerHTML=hl;
+var ctx=document.getElementById("ch").getContext("2d");if(ci)ci.destroy();
+var cum=0,dp=[0],lb=["Start"];
+for(var i=0;i<c.length;i++){cum+=getRR(c[i]);dp.push(cum);lb.push("T"+(i+1))}
+ci=new Chart(ctx,{type:"line",data:{labels:lb,datasets:[{label:"Net R",data:dp,borderColor:"#0ecb81",backgroundColor:"rgba(14,203,129,0.1)",borderWidth:2,fill:true,tension:0.3,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{grid:{color:"#2b3139"},ticks:{color:"#848e9c"}}}}})
 }
-
-function saveData() {
-    localStorage.setItem('ghost_trades_v5', JSON.stringify(trades));
-}
-
-function getVal(o,k){return o[k]!==undefined?o[k]:(o[k+" "]!==undefined?o[k+" "]:(o[" "+k]!==undefined?o[" "+k]:""))}
-
-function init(){
-    loadData();
-    renderStats();renderTables();renderList();renderChart();
-    document.getElementById('inp-date').valueAsDate=new Date();
-    const n=new Date();
-    document.getElementById('inp-time').value=n.getHours().toString().padStart(2,'0')+':'+n.getMinutes().toString().padStart(2,'0');
-}
-
-function renderStats(){const c=trades.filter(t=>getVal(t,"Statut").trim()==="Closed");const tot=c.length;let w=0,nr=0,np=0,pok=0;c.forEach(t=>{const rr=parseFloat(getVal(t,"RR réalisé"))||0;const p=parseFloat(getVal(t,"Résultat %"))||0;nr+=rr;np+=p;if(rr>0)w++;if(getVal(t,"Plan OK").trim()==="OUI")pok++});const wr=tot>0?((w/tot)*100).toFixed(0):0;const pp=tot>0?((pok/tot)*100).toFixed(0):0;document.getElementById('total-trades-badge').innerText=trades.length+" trades";document.getElementById('stat-closed').innerText=tot;const ew=document.getElementById('stat-winrate');ew.innerText=wr+"%";ew.className="stat-value "+(wr>=50?'val-green':'val-red');const er=document.getElementById('stat-netr');er.innerText=(nr>0?'+':'')+nr.toFixed(1);er.className="stat-value "+(nr>=0?'val-green':'val-red');const ep=document.getElementById('stat-netpct');ep.innerText=(np>0?'+':'')+np.toFixed(2);ep.className="stat-value "+(np>=0?'val-green':'val-red');const epl=document.getElementById('stat-plan');epl.innerText=pp+"%";epl.className="stat-value "+(pp>=90?'val-green':'val-orange')}
-
-function renderTables(){const c=trades.filter(t=>getVal(t,"Statut").trim()==="Closed");const sig={},ses={};c.forEach(t=>{const s=getVal(t,"Signal").trim();if(!sig[s])sig[s]={n:0,w:0,r:0};sig[s].n++;const rr=parseFloat(getVal(t,"RR réalisé"))||0;sig[s].r+=rr;if(rr>0)sig[s].w++;let se=getVal(t,"Session").trim().toUpperCase();if(se==="LONDRES"||se==="LONDON")se="LONDRES";if(se==="HORS SESSION"||se==="HORS KILLZONE")se="HORS KILLZONE";if(!ses[se])ses[se]={n:0,w:0,r:0};ses[se].n++;ses[se].r+=rr;if(rr>0)ses[se].w++});const ts=document.getElementById('tbody-signal');ts.innerHTML='';Object.keys(sig).sort((a,b)=>sig[b].r-sig[a].r).forEach(s=>{const d=sig[s];const cl=d.r>=0?'val-green':'val-red';ts.innerHTML+='<tr><td style="font-weight:bold">'+s+'</td><td class="text-center">'+d.n+'</td><td class="text-center">'+d.w+'</td><td class="text-right '+cl+'">'+(d.r>0?'+':'')+d.r.toFixed(1)+'</td></tr>'});const tse=document.getElementById('tbody-session');tse.innerHTML='';Object.keys(ses).sort((a,b)=>ses[b].r-ses[a].r).forEach(s=>{const d=ses[s];const cl=d.r>=0?'val-green':'val-red';tse.innerHTML+='<tr><td style="font-weight:bold">'+s+'</td><td class="text-center">'+d.n+'</td><td class="text-center">'+d.w+'</td><td class="text-right '+cl+'">'+(d.r>0?'+':'')+d.r.toFixed(1)+'</td></tr>'})}
-
-function renderList(){const l=document.getElementById('trade-list');l.innerHTML='';[...trades].reverse().slice(0,10).forEach(t=>{const p=getVal(t,"Paire").trim(),d=getVal(t,"Date").trim(),s=getVal(t,"Signal").trim(),rr=parseFloat(getVal(t,"RR réalisé"))||0,st=getVal(t,"Statut").trim();let rt=st==="Annulé"?"ANNULÉ":((rr>0?'+':'')+rr.toFixed(1)+'R');let cl=st==="Annulé"?'val-orange':(rr>=0?'val-green':'val-red');l.innerHTML+='<div class="trade-item"><div class="trade-info"><span class="trade-pair">'+p+' <span style="font-size:.8em;color:var(--muted);font-weight:normal">('+s+')</span></span><span class="trade-meta">'+d+'</span></div><div class="trade-result '+cl+'">'+rt+'</div></div>'})}
-
-let equityChartInstance=null;
-function renderChart(){const ctx=document.getElementById('equityChart').getContext('2d');const c=trades.filter(t=>getVal(t,"Statut").trim()==="Closed");let cum=0;const dp=[0],lb=['Start'];c.forEach((t,i)=>{cum+=(parseFloat(getVal(t,"RR réalisé"))||0);dp.push(cum);lb.push('T'+(i+1))});if(equityChartInstance)equityChartInstance.destroy();equityChartInstance=new Chart(ctx,{type:'line',data:{labels:lb,datasets:[{label:'Net R',data:dp,borderColor:'#0ecb81',backgroundColor:'rgba(14,203,129,0.1)',borderWidth:2,fill:true,tension:0.3,pointRadius:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{grid:{color:'#2b3139'},ticks:{color:'#848e9c'}}}}})}
-
-function openModal(){document.getElementById('addModal').style.display='flex'}
-function closeModal(){document.getElementById('addModal').style.display='none'}
-
-function saveTrade(){
-    const nt={"Date ":document.getElementById('inp-date').value,"Heure ":document.getElementById('inp-time').value,"Paire ":document.getElementById('inp-pair').value.toUpperCase(),"Sens ":document.getElementById('inp-sens').value,"Signal ":document.getElementById('inp-signal').value,"Session ":document.getElementById('inp-session').value,"Grade ":document.getElementById('inp-grade').value,"Statut ":document.getElementById('inp-status').value,"Risque % ":parseFloat(document.getElementById('inp-risk').value),"RR prévu ":parseFloat(document.getElementById('inp-rr-plan').value),"RR réalisé ":parseFloat(document.getElementById('inp-rr-real').value),"Plan OK ":document.getElementById('inp-plan').value,"Notes ":document.getElementById('inp-notes').value,"Résultat % ":0};
-    if(nt["Statut "]==="Closed")nt["Résultat % "]=parseFloat((nt["Risque % "]*nt["RR réalisé "
+function openM(){document.getElementById("modal").style.display="flex"}
+function closeM(){document.getElementById("modal").style.display="none"}
+function addT(){
+var nt={};nt["Date"]=document.getElementById("i1").value;nt["Heure"]=document.getElementById("i2").value;nt["Paire"]=document.getElementById("i3").value.toUpperCase();nt["Sens"]=document.getElementById("i4").value;nt["Signal"]=document.getElementById("i5").value;nt["Session"]=document.getElementById("i6").value;nt["Grade"]=document.getElementById("i7").value;nt["Risque %"]=parseFloat(document.getElementById("i8").value);nt["RR pr\u00e9vu"]=parseFloat(document.getElementById("i9").value);nt["RR r\u00e9alis\u00e9"]=parseFloat(document.getElementById("i10").value);nt["Statut"]=document.getElementById("i11").value;nt["Plan OK"]=document.getElementById("i12").value;nt["Notes"]=document.getElementById("i13").value;nt["R\u00e9sultat %"]=nt["Statut"]==="Closed"?parseFloat((nt["Risque %"]*nt["RR r\u00e9alis\u00e9"]).toFixed(2)):0;
+trades.push(nt);save();render();closeM();toast("Sauvegard\u00e9 !");document.getElementById("i3").value="";document.getElementById("i13").value="";document.getElementById("i10").value="0.0"}
+function imp(input){var file=input.files[0];if(!file)return;var reader=new FileReader();reader.onload=function(e){try{trades=JSON.parse(e.target.result);save();render();toast("Import\u00e9 ! "+trades.length+" trades")}catch(err){toast("Erreur JSON")}};reader.readAsText(file)}
+function exp(){var a=document.createElement("a");a.href="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(trades,null,2));a.download="ghost_journal.json";a.click();toast("JSON Export\u00e9 !")}
+function toast(m){var t=document.getElementById("toast");t.innerText=m;t.classList.add("show");setTimeout(function(){t.classList.remove("show")},3000)}
+window.onload=init;
+</script>
+</body>
+                                                                                                                                                                                                                                                                                                                                                               </html>
