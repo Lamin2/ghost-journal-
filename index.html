@@ -130,4 +130,10 @@ function saveTrade(){
 function exportData(){
     const ds="data:text/json;charset=utf-8,"+encodeURIComponent(JSON.stringify(trades,null,2));
     const a=document.createElement('a');a.setAttribute("href",ds);a.setAttribute("download","ghost_journal.json");
-    document
+    document.body.appendChild(a);a.click();a.remove();showToast("JSON Exporté ! Envoie sur Telegram.");
+}
+function showToast(m){const t=document.getElementById('toast');t.innerText=m||"Sauvegardé !";t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}
+window.onload=init;
+</script>
+</body>
+</html>
